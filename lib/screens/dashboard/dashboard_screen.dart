@@ -10,7 +10,7 @@ import '../trips/trips_screen.dart';
 import '../payments/payments_screen.dart';
 import '../statements/statement_screen.dart';
 import '../freights/freights_screen.dart'; // استيراد شاشة مقاولات النقل
-import '../freights/freight_statement_screen.dart'; // استيراد كشف حساب النقل
+import '../freights/freights_statement_screen.dart'; // استيراد كشف حساب النقل
 
 class DashboardScreen extends StatefulWidget {
   final Function(int) onNavigateTab;
