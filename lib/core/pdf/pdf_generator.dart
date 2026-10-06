@@ -122,7 +122,7 @@ class PdfGenerator {
             children: [
               pw.Center(
                 child: pw.Text(
-                  'حسابات السيد النماس',
+                  'حسابات علاء ابو شادي',
                   style: pw.TextStyle(
                     font: fontBold,
                     fontSize: 19,
@@ -476,7 +476,7 @@ class PdfGenerator {
             children: [
               pw.Center(
                 child: pw.Text(
-                  'حسابات السيد النماس',
+                  'حسابات علاء ابو شادي',
                   textDirection: pw.TextDirection.rtl,
                   style: pw.TextStyle(
                     fontSize: 22,
