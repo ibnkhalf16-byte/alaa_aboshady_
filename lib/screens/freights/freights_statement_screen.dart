@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/app_formatters.dart';
+import '../../core/pdf/pdf_generator.dart';
 import '../../models/person_model.dart';
 import '../../models/freight_model.dart';
 
@@ -24,6 +25,7 @@ class _FreightStatementScreenState
   final SupabaseClient supabase = Supabase.instance.client;
 
   bool _loading = true;
+  bool _generatingPdf = false;
 
   List<PersonModel> _persons = [];
   List<FreightModel> _allFreights = [];
@@ -153,6 +155,66 @@ class _FreightStatementScreenState
       _totalDue = totalDue;
       _totalWeight = totalWeight;
     });
+  }
+
+  // ============================================================
+  // إنشاء PDF
+  // ============================================================
+
+  Future<void> _generatePdf() async {
+    final person = _selectedPerson;
+
+    if (person == null) {
+      _showError('يرجى اختيار العميل أولاً.');
+      return;
+    }
+
+    if (_freights.isEmpty) {
+      _showError(
+        'لا توجد مقاولات نقل لإنشاء كشف PDF.',
+      );
+      return;
+    }
+
+    if (_generatingPdf) return;
+
+    setState(() {
+      _generatingPdf = true;
+    });
+
+    try {
+      await PdfGenerator.generateAndPrintFreightStatement(
+        person: person,
+        freights: _freights,
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'تم تجهيز كشف حساب النقل بنجاح',
+            textDirection: TextDirection.rtl,
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e, stackTrace) {
+      debugPrint('Generate freight PDF error: $e');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      _showError(
+        'تعذر إنشاء ملف PDF:\n$e',
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _generatingPdf = false;
+        });
+      }
+    }
   }
 
   // ============================================================
@@ -377,9 +439,9 @@ class _FreightStatementScreenState
             ),
 
             _amountRow(
-              'المستحق',
+              'المستحق لنا',
               freight.due,
-              Colors.red.shade700,
+              AppColors.receivableGreen,
             ),
 
             const SizedBox(height: 8),
@@ -396,9 +458,9 @@ class _FreightStatementScreenState
               ),
               decoration: BoxDecoration(
                 color: balance > 0
-                    ? Colors.red.withOpacity(0.06)
+                    ? Colors.green.withOpacity(0.06)
                     : balance < 0
-                        ? Colors.green.withOpacity(0.06)
+                        ? Colors.red.withOpacity(0.06)
                         : Colors.grey.withOpacity(0.06),
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -407,7 +469,7 @@ class _FreightStatementScreenState
                     MainAxisAlignment.spaceBetween,
                 children: [
                   const Text(
-                    'الرصيد التراكمي',
+                    'الرصيد التراكمي المستحق لنا',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                     ),
@@ -417,9 +479,9 @@ class _FreightStatementScreenState
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: balance > 0
-                          ? Colors.red.shade700
+                          ? AppColors.receivableGreen
                           : balance < 0
-                              ? Colors.green.shade700
+                              ? Colors.red.shade700
                               : Colors.grey.shade700,
                     ),
                   ),
@@ -445,6 +507,10 @@ class _FreightStatementScreenState
       ),
     );
   }
+
+  // ============================================================
+  // صف التفاصيل
+  // ============================================================
 
   Widget _detailRow(
     String title,
@@ -477,6 +543,10 @@ class _FreightStatementScreenState
       ),
     );
   }
+
+  // ============================================================
+  // صف المبالغ
+  // ============================================================
 
   Widget _amountRow(
     String title,
@@ -521,10 +591,44 @@ class _FreightStatementScreenState
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+        // ========================================================
+        // AppBar
+        // ========================================================
+
         appBar: AppBar(
           title: const Text('كشف حساب النقل'),
           centerTitle: true,
+          actions: [
+            if (_selectedPerson != null)
+              _generatingPdf
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      child: Center(
+                        child: SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    )
+                  : IconButton(
+                      onPressed: _generatePdf,
+                      tooltip: 'طباعة وتصدير PDF',
+                      icon: const Icon(
+                        Icons.picture_as_pdf_outlined,
+                      ),
+                    ),
+          ],
         ),
+
+        // ========================================================
+        // Body
+        // ========================================================
 
         body: _loading
             ? const Center(
@@ -602,18 +706,26 @@ class _FreightStatementScreenState
                                         ),
                                       ),
                                       const SizedBox(height: 4),
+
+                                      // --------------------------------
+                                      // الرصيد المستحق لنا
+                                      // --------------------------------
+
                                       Text(
                                         isBalanced
                                             ? 'الحساب متزن'
                                             : isReceivable
-                                                ? 'المستحق علينا للعميل: ${_money(balance)}'
-                                                : 'الرصيد: ${_money(balance.abs())}',
+                                                ? 'المستحق لنا: ${_money(balance)}'
+                                                : 'رصيد دائن: ${_money(balance.abs())}',
                                         style: TextStyle(
                                           fontWeight:
                                               FontWeight.bold,
                                           color: isBalanced
                                               ? Colors.grey.shade700
-                                              : Colors.red.shade700,
+                                              : isReceivable
+                                                  ? AppColors
+                                                      .receivableGreen
+                                                  : Colors.red.shade700,
                                         ),
                                       ),
                                     ],
@@ -623,6 +735,10 @@ class _FreightStatementScreenState
                             ),
 
                             const SizedBox(height: 10),
+
+                            // ------------------------------------------
+                            // إجمالي النقل + المسدد
+                            // ------------------------------------------
 
                             Row(
                               children: [
@@ -646,16 +762,20 @@ class _FreightStatementScreenState
                               ],
                             ),
 
+                            // ------------------------------------------
+                            // المستحق لنا + الوزن
+                            // ------------------------------------------
+
                             Row(
                               children: [
                                 _summaryCard(
-                                  title: 'المستحق',
+                                  title: 'المستحق لنا',
                                   value:
                                       _money(_totalDue),
                                   icon:
                                       Icons.account_balance_wallet,
                                   color:
-                                      AppColors.payableRed,
+                                      AppColors.receivableGreen,
                                 ),
                                 _summaryCard(
                                   title: 'الوزن',
