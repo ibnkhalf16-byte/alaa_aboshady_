@@ -10,8 +10,8 @@ void main() async {
 
   // تهيئة الاتصال بقاعدة بيانات Supabase
   await Supabase.initialize(
-    url: 'https://fxfjuspajexuswenluuu.supabase.co',
-    publishableKey: 'sb_publishable_WE6y9VaRNCKXy2ORYax4pw_zXD57MHF',
+    url: 'https://jktqkxprxmgwcvrbtqqg.supabase.co',
+    publishableKey: 'sb_publishable_YR3nbFbEsvbEfc1fiP8R1g_cS2Zoj8q',
   );
 
   runApp(const ElsayedAccountsApp());
