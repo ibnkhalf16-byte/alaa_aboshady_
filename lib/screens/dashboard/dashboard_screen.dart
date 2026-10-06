@@ -327,7 +327,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'حسابات السيد النماس',
+            'حسابات علاء ابو شادي',
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),
