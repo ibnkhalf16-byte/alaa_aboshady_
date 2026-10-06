@@ -12,7 +12,7 @@ import '../trips/trips_screen.dart';
 import '../payments/payments_screen.dart';
 import '../statements/statement_screen.dart';
 import '../freights/freights_screen.dart';
-import '../freights/freight_statement_screen.dart';
+import '../freights/freights_statement_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   final Function(int) onNavigateTab;
