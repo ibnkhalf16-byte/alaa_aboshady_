@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // إضافة حزمة Supabase
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/accounting/accounting_engine.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/app_formatters.dart';
@@ -9,6 +9,8 @@ import '../../models/payment_model.dart';
 import '../trips/trips_screen.dart';
 import '../payments/payments_screen.dart';
 import '../statements/statement_screen.dart';
+import '../freights/freights_screen.dart'; // استيراد شاشة مقاولات النقل
+import '../freights/freight_statement_screen.dart'; // استيراد كشف حساب النقل
 
 class DashboardScreen extends StatefulWidget {
   final Function(int) onNavigateTab;
@@ -33,16 +35,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _loadDashboardData();
   }
 
-  // ==========================================================
-  // جلب البيانات من Supabase
-  // ==========================================================
   Future<void> _loadDashboardData() async {
     setState(() => _isLoading = true);
     
     try {
       final supabase = Supabase.instance.client;
       
-      // استدعاء البيانات من الجداول السحابية
       final pMaps = await supabase.from('persons').select();
       final tMaps = await supabase.from('trips').select();
       final payMaps = await supabase.from('payments').select();
@@ -145,7 +143,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Icon(icon, color: color, size: 28),
           ),
           const SizedBox(height: 8),
-          Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+          Text(title, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -243,6 +241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 8,
+                      // تم تعديل الأزرار هنا لتشمل مقاولات النقل
                       children: [
                         _buildActionBtn(
                           title: 'نقلة شراء',
@@ -258,6 +257,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           color: AppColors.primary,
                           onTap: () {
                              Navigator.push(context, MaterialPageRoute(builder: (_) => const TripsScreen(initialOperation: 'sale')));
+                          },
+                        ),
+                        // الزر الجديد لتسجيل مقاولة نقل
+                        _buildActionBtn(
+                          title: 'مقاولة نقل',
+                          icon: Icons.fire_truck_outlined,
+                          color: const Color(0xFF0D9488), // لون مميز (Teal)
+                          onTap: () {
+                             Navigator.push(context, MaterialPageRoute(builder: (_) => const FreightsScreen()));
                           },
                         ),
                         _buildActionBtn(
@@ -290,6 +298,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           color: Colors.purple,
                           onTap: () {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const StatementScreen()));
+                          },
+                        ),
+                         // الزر الجديد لفتح كشف حساب النقل
+                        _buildActionBtn(
+                          title: 'كشف نقل',
+                          icon: Icons.request_quote_outlined,
+                          color: const Color(0xFF0F766E), // درجة أغمق من الـ Teal
+                          onTap: () {
+                            // نفتح شاشة اختيار العميل أولاً، أو نذهب مباشرة إذا كان كشف الحساب العام يدعم اختيار العميل
+                             Navigator.push(context, MaterialPageRoute(builder: (_) => const FreightsScreen())); 
+                             // ملاحظة: تم توجيهه لسجل المقاولات لأن كشف حساب النقل يحتاج لعميل محدد `FreightStatementScreen(person: ...)`
                           },
                         ),
                       ],
