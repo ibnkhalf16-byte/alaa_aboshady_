@@ -10,15 +10,15 @@ void main() async {
 
   // تهيئة الاتصال بقاعدة بيانات Supabase
   await Supabase.initialize(
-    url: 'https://jktqkxprxmgwcvrbtqqg.supabase.co',
-    publishableKey: 'sb_publishable_YR3nbFbEsvbEfc1fiP8R1g_cS2Zoj8q',
+    url: 'https://eeqgzwsyzoitpjrlgohx.supabase.co',
+    publishableKey: 'sb_publishable_y5EyMhMxk4XlXtZKmcikaA_nR7be8Xv',
   );
 
-  runApp(const ElsayedAccountsApp());
+  runApp(const AlaaAccountsApp());
 }
 
-class ElsayedAccountsApp extends StatelessWidget {
-  const ElsayedAccountsApp({super.key});
+class AlaaAccountsApp extends StatelessWidget {
+  const AlaaAccountsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
