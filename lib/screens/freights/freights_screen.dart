@@ -59,13 +59,11 @@ class _FreightsScreenState extends State<FreightsScreen> {
           .order('created_at', ascending: false);
 
       final personNames = {
-        for (var p in pMaps)
-          p['id']: p['name'],
+        for (var p in pMaps) p['id']: p['name'],
       };
 
       final fMaps = rawFreights.map((f) {
-        final mutableFreight =
-            Map<String, dynamic>.from(f);
+        final mutableFreight = Map<String, dynamic>.from(f);
 
         mutableFreight['client_name'] =
             personNames[f['client_id']] ?? 'غير معروف';
@@ -131,8 +129,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
 
     final formKey = GlobalKey<FormState>();
 
-    String? selectedClient =
-        existing?.clientId;
+    String? selectedClient = existing?.clientId;
 
     DateTime selectedDate = existing != null
         ? (DateTime.tryParse(existing.date) ??
@@ -140,101 +137,78 @@ class _FreightsScreenState extends State<FreightsScreen> {
         : DateTime.now();
 
     final dateCtrl = TextEditingController(
-      text: DateFormat('yyyy-MM-dd')
-          .format(selectedDate),
+      text: DateFormat('yyyy-MM-dd').format(selectedDate),
     );
 
-    final supplierCtrl =
-        TextEditingController(
+    final supplierCtrl = TextEditingController(
       text: existing?.supplierName ?? '',
     );
 
-    final loadingCtrl =
-        TextEditingController(
+    final loadingCtrl = TextEditingController(
       text: existing?.loadingPoint ?? '',
     );
 
-    final unloadingCtrl =
-        TextEditingController(
+    final unloadingCtrl = TextEditingController(
       text: existing?.unloadingPoint ?? '',
     );
 
-    final itemTypeCtrl =
-        TextEditingController(
+    final itemTypeCtrl = TextEditingController(
       text: existing?.itemType ?? '',
     );
 
-    final weightCtrl =
-        TextEditingController(
+    final weightCtrl = TextEditingController(
       text: existing != null
           ? existing.weight.toString()
           : '',
     );
 
-    final rateCtrl =
-        TextEditingController(
+    final rateCtrl = TextEditingController(
       text: existing != null
           ? existing.freightRate.toString()
           : '',
     );
 
-    final additionsCtrl =
-        TextEditingController(
-      text: existing != null &&
-              existing.additions > 0
+    final additionsCtrl = TextEditingController(
+      text: existing != null && existing.additions > 0
           ? existing.additions.toString()
           : '',
     );
 
-    final shortageCtrl =
-        TextEditingController(
-      text: existing != null &&
-              existing.shortage > 0
+    final shortageCtrl = TextEditingController(
+      text: existing != null && existing.shortage > 0
           ? existing.shortage.toString()
           : '',
     );
 
-    final paidCtrl =
-        TextEditingController(
-      text: existing != null &&
-              existing.paid > 0
+    final paidCtrl = TextEditingController(
+      text: existing != null && existing.paid > 0
           ? existing.paid.toString()
           : '',
     );
 
-    final notesCtrl =
-        TextEditingController(
+    final notesCtrl = TextEditingController(
       text: existing?.notes ?? '',
     );
 
     double calcTotal() {
       final w =
-          double.tryParse(weightCtrl.text.trim()) ??
-              0.0;
+          double.tryParse(weightCtrl.text.trim()) ?? 0.0;
 
       final r =
-          double.tryParse(rateCtrl.text.trim()) ??
-              0.0;
+          double.tryParse(rateCtrl.text.trim()) ?? 0.0;
 
       final add =
-          double.tryParse(
-                additionsCtrl.text.trim(),
-              ) ??
-              0.0;
+          double.tryParse(additionsCtrl.text.trim()) ?? 0.0;
 
       final short =
-          double.tryParse(
-                shortageCtrl.text.trim(),
-              ) ??
-              0.0;
+          double.tryParse(shortageCtrl.text.trim()) ?? 0.0;
 
       return (w * r) + add - short;
     }
 
     double calcDue() {
       final p =
-          double.tryParse(paidCtrl.text.trim()) ??
-              0.0;
+          double.tryParse(paidCtrl.text.trim()) ?? 0.0;
 
       return calcTotal() - p;
     }
@@ -251,8 +225,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
           textDirection: TextDirection.rtl,
           child: AlertDialog(
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16),
             ),
             title: Text(
               isEdit
@@ -263,320 +236,253 @@ class _FreightsScreenState extends State<FreightsScreen> {
               key: formKey,
               child: SingleChildScrollView(
                 child: Column(
-                  mainAxisSize:
-                      MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
+                    // ==================================================
                     // التاريخ
+                    // ==================================================
+
                     ListTile(
-                      contentPadding:
-                          EdgeInsets.zero,
+                      contentPadding: EdgeInsets.zero,
                       title: Text(
                         'التاريخ: ${dateCtrl.text}',
-                        style:
-                            const TextStyle(
-                          fontWeight:
-                              FontWeight.bold,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      trailing:
-                          const Icon(
+                      trailing: const Icon(
                         Icons.calendar_month,
-                        color:
-                            AppColors.primary,
+                        color: AppColors.primary,
                       ),
                       onTap: () async {
                         final picked =
                             await showDatePicker(
                           context: context,
-                          initialDate:
-                              selectedDate,
-                          firstDate:
-                              DateTime(2020),
-                          lastDate:
-                              DateTime(2035),
+                          initialDate: selectedDate,
+                          firstDate: DateTime(2020),
+                          lastDate: DateTime(2035),
                         );
 
                         if (picked != null) {
                           setModalState(() {
-                            selectedDate =
-                                picked;
+                            selectedDate = picked;
 
                             dateCtrl.text =
-                                DateFormat(
-                              'yyyy-MM-dd',
-                            ).format(picked);
+                                DateFormat('yyyy-MM-dd')
+                                    .format(picked);
                           });
                         }
                       },
                     ),
 
+                    // ==================================================
                     // العميل
-                    DropdownButtonFormField<
-                        String>(
-                      value:
-                          selectedClient,
-                      decoration:
-                          const InputDecoration(
-                        labelText:
-                            'اسم العميل (حساب النقل)',
+                    // ==================================================
+
+                    DropdownButtonFormField<String>(
+                      value: selectedClient,
+                      decoration: const InputDecoration(
+                        labelText: 'اسم العميل (حساب النقل)',
                       ),
                       items: _clients
                           .map(
-                            (c) =>
-                                DropdownMenuItem(
+                            (c) => DropdownMenuItem(
                               value: c.id,
-                              child:
-                                  Text(c.name),
+                              child: Text(c.name),
                             ),
                           )
                           .toList(),
                       onChanged: (v) {
                         setModalState(
-                          () =>
-                              selectedClient =
-                                  v,
+                          () => selectedClient = v,
                         );
                       },
-                      validator: (v) =>
-                          v == null
-                              ? 'يرجى اختيار العميل'
-                              : null,
+                      validator: (v) => v == null
+                          ? 'يرجى اختيار العميل'
+                          : null,
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
 
+                    // ==================================================
                     // المورد والبضاعة
+                    // ==================================================
+
                     Row(
                       children: [
                         Expanded(
-                          child:
-                              TextFormField(
-                            controller:
-                                supplierCtrl,
-                            decoration:
-                                const InputDecoration(
-                              labelText:
-                                  'اسم المورد',
+                          child: TextFormField(
+                            controller: supplierCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'اسم المورد',
                             ),
                           ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child:
-                              TextFormField(
-                            controller:
-                                itemTypeCtrl,
-                            decoration:
-                                const InputDecoration(
-                              labelText:
-                                  'نوع البضاعة',
+                          child: TextFormField(
+                            controller: itemTypeCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'نوع البضاعة',
                             ),
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
 
+                    // ==================================================
                     // التحميل والتعتيق
+                    // ==================================================
+
                     Row(
                       children: [
                         Expanded(
-                          child:
-                              TextFormField(
-                            controller:
-                                loadingCtrl,
-                            decoration:
-                                const InputDecoration(
-                              labelText:
-                                  'جهة التحميل',
+                          child: TextFormField(
+                            controller: loadingCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'جهة التحميل',
                             ),
                           ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child:
-                              TextFormField(
-                            controller:
-                                unloadingCtrl,
-                            decoration:
-                                const InputDecoration(
-                              labelText:
-                                  'جهة التعتيق',
+                          child: TextFormField(
+                            controller: unloadingCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'جهة التعتيق',
                             ),
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
 
+                    // ==================================================
                     // الوزن والنولون
+                    // ==================================================
+
                     Row(
                       children: [
                         Expanded(
-                          child:
-                              TextFormField(
-                            controller:
-                                weightCtrl,
-                            decoration:
-                                const InputDecoration(
-                              labelText:
-                                  'الوزن (طن)',
+                          child: TextFormField(
+                            controller: weightCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'الوزن (طن)',
                             ),
                             keyboardType:
-                                TextInputType
-                                    .number,
+                                const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (_) =>
-                                setModalState(
-                                    () {}),
+                                setModalState(() {}),
                           ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child:
-                              TextFormField(
-                            controller:
-                                rateCtrl,
-                            decoration:
-                                const InputDecoration(
-                              labelText:
-                                  'النولون',
+                          child: TextFormField(
+                            controller: rateCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'النولون',
                             ),
                             keyboardType:
-                                TextInputType
-                                    .number,
+                                const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (_) =>
-                                setModalState(
-                                    () {}),
+                                setModalState(() {}),
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
 
+                    // ==================================================
                     // الإضافات والعجز
+                    // ==================================================
+
                     Row(
                       children: [
                         Expanded(
-                          child:
-                              TextFormField(
-                            controller:
-                                additionsCtrl,
-                            decoration:
-                                const InputDecoration(
-                              labelText:
-                                  'إضافات (+)',
+                          child: TextFormField(
+                            controller: additionsCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'إضافات (+)',
                             ),
                             keyboardType:
-                                TextInputType
-                                    .number,
+                                const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (_) =>
-                                setModalState(
-                                    () {}),
+                                setModalState(() {}),
                           ),
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child:
-                              TextFormField(
-                            controller:
-                                shortageCtrl,
-                            decoration:
-                                const InputDecoration(
-                              labelText:
-                                  'عجز (-)',
+                          child: TextFormField(
+                            controller: shortageCtrl,
+                            decoration: const InputDecoration(
+                              labelText: 'عجز (-)',
                             ),
                             keyboardType:
-                                TextInputType
-                                    .number,
+                                const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
                             onChanged: (_) =>
-                                setModalState(
-                                    () {}),
+                                setModalState(() {}),
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
 
+                    // ==================================================
                     // مسدد
+                    // ==================================================
+
                     TextFormField(
                       controller: paidCtrl,
-                      decoration:
-                          const InputDecoration(
-                        labelText:
-                            'مسدد من الحساب',
+                      decoration: const InputDecoration(
+                        labelText: 'مسدد من الحساب',
                       ),
                       keyboardType:
-                          TextInputType.number,
-                      onChanged: (_) =>
-                          setModalState(
-                              () {}),
-                    ),
-
-                    const SizedBox(
-                      height: 15,
-                    ),
-
-                    // ملخص
-                    Container(
-                      padding:
-                          const EdgeInsets.all(
-                        12,
+                          const TextInputType.numberWithOptions(
+                        decimal: true,
                       ),
-                      decoration:
-                          BoxDecoration(
-                        color: AppColors
-                            .primary
-                            .withOpacity(
-                          0.1,
-                        ),
+                      onChanged: (_) =>
+                          setModalState(() {}),
+                    ),
+
+                    const SizedBox(height: 15),
+
+                    // ==================================================
+                    // ملخص
+                    // ==================================================
+
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
                         borderRadius:
-                            BorderRadius
-                                .circular(
-                          8,
-                        ),
+                            BorderRadius.circular(8),
                       ),
                       child: Column(
                         children: [
                           Row(
                             mainAxisAlignment:
-                                MainAxisAlignment
-                                    .spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'الإجمالي:',
-                              ),
+                              const Text('الإجمالي:'),
                               Text(
-                                AppFormatters
-                                    .formatCurrency(
+                                AppFormatters.formatCurrency(
                                   calcTotal(),
                                 ),
-                                style:
-                                    const TextStyle(
-                                  fontWeight:
-                                      FontWeight
-                                          .bold,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],
@@ -584,25 +490,16 @@ class _FreightsScreenState extends State<FreightsScreen> {
                           const Divider(),
                           Row(
                             mainAxisAlignment:
-                                MainAxisAlignment
-                                    .spaceBetween,
+                                MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                'المستحق:',
-                              ),
+                              const Text('المستحق:'),
                               Text(
-                                AppFormatters
-                                    .formatCurrency(
+                                AppFormatters.formatCurrency(
                                   calcDue(),
                                 ),
-                                style:
-                                    const TextStyle(
-                                  fontWeight:
-                                      FontWeight
-                                          .bold,
-                                  color:
-                                      AppColors
-                                          .payableRed,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.payableRed,
                                 ),
                               ),
                             ],
@@ -611,175 +508,173 @@ class _FreightsScreenState extends State<FreightsScreen> {
                       ),
                     ),
 
-                    const SizedBox(
-                      height: 10,
-                    ),
+                    const SizedBox(height: 10),
+
+                    // ==================================================
+                    // ملاحظات
+                    // ==================================================
 
                     TextFormField(
                       controller: notesCtrl,
                       maxLines: 2,
-                      decoration:
-                          const InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: 'ملاحظات',
-                        border:
-                            OutlineInputBorder(),
+                        border: OutlineInputBorder(),
                       ),
                     ),
                   ],
                 ),
               ),
             ),
+
+            // ==========================================================
+            // أزرار النافذة
+            // ==========================================================
+
             actions: [
               TextButton(
-                onPressed: () =>
-                    Navigator.pop(ctx),
-                child:
-                    const Text('إلغاء'),
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('إلغاء'),
               ),
+
               ElevatedButton(
                 onPressed: () async {
-                  if (!formKey
-                      .currentState!
-                      .validate()) {
+                  // --------------------------------------------------
+                  // التحقق من صحة البيانات
+                  // --------------------------------------------------
+
+                  if (!formKey.currentState!.validate()) {
                     return;
                   }
 
-                  if (selectedClient ==
-                      null) {
+                  if (selectedClient == null) {
                     return;
                   }
+
+                  // --------------------------------------------------
+                  // تحويل القيم
+                  // --------------------------------------------------
 
                   final weight =
                       double.tryParse(
-                            weightCtrl.text
-                                .trim(),
+                            weightCtrl.text.trim(),
                           ) ??
                           0.0;
 
                   final rate =
                       double.tryParse(
-                            rateCtrl.text
-                                .trim(),
+                            rateCtrl.text.trim(),
                           ) ??
                           0.0;
 
                   final additions =
                       double.tryParse(
-                            additionsCtrl
-                                .text
-                                .trim(),
+                            additionsCtrl.text.trim(),
                           ) ??
                           0.0;
 
                   final shortage =
                       double.tryParse(
-                            shortageCtrl
-                                .text
-                                .trim(),
+                            shortageCtrl.text.trim(),
                           ) ??
                           0.0;
 
                   final paid =
                       double.tryParse(
-                            paidCtrl.text
-                                .trim(),
+                            paidCtrl.text.trim(),
                           ) ??
                           0.0;
 
-                  final total =
-                      calcTotal();
+                  final total = calcTotal();
+                  final due = calcDue();
 
-                  final due =
-                      calcDue();
+                  // --------------------------------------------------
+                  // الحماية
+                  //
+                  // verifyPassword:
+                  // 1- يحاول البصمة أولاً
+                  // 2- إذا لم تنجح/لم تتوفر ينتقل لكلمة المرور
+                  // --------------------------------------------------
+
+                  final isAuth =
+                      await SettingsScreen.verifyPassword(
+                    context,
+                  );
+
+                  if (!isAuth) {
+                    return;
+                  }
+
+                  if (!context.mounted) {
+                    return;
+                  }
 
                   final supabase =
-                      Supabase.instance
-                          .client;
+                      Supabase.instance.client;
 
                   try {
+                    // ==================================================
+                    // تعديل مقاولة موجودة
+                    // ==================================================
+
                     if (isEdit) {
-                      final isAuth =
-                          await SettingsScreen
-                              .verifyPassword(
-                        context,
-                      );
-
-                      if (!isAuth) return;
-
-                      final updated =
-                          FreightModel(
+                      final updated = FreightModel(
                         id: existing.id,
-                        date:
-                            dateCtrl.text,
-                        clientId:
-                            selectedClient!,
-                        supplierName:
-                            supplierCtrl.text,
-                        loadingPoint:
-                            loadingCtrl.text,
+                        date: dateCtrl.text,
+                        clientId: selectedClient!,
+                        supplierName: supplierCtrl.text.trim(),
+                        loadingPoint: loadingCtrl.text.trim(),
                         unloadingPoint:
-                            unloadingCtrl.text,
-                        itemType:
-                            itemTypeCtrl.text,
+                            unloadingCtrl.text.trim(),
+                        itemType: itemTypeCtrl.text.trim(),
                         weight: weight,
                         freightRate: rate,
-                        additions:
-                            additions,
-                        shortage:
-                            shortage,
+                        additions: additions,
+                        shortage: shortage,
                         paid: paid,
                         total: total,
                         due: due,
-                        notes:
-                            notesCtrl.text,
+                        notes: notesCtrl.text.trim(),
                       );
 
                       await supabase
                           .from('freights')
-                          .update(
-                            updated.toMap(),
-                          )
-                          .eq(
-                            'id',
-                            existing.id,
-                          );
-                    } else {
-                      final newFreight =
-                          FreightModel(
-                        id: const Uuid()
-                            .v4(),
-                        date:
-                            dateCtrl.text,
-                        clientId:
-                            selectedClient!,
-                        supplierName:
-                            supplierCtrl.text,
-                        loadingPoint:
-                            loadingCtrl.text,
-                        unloadingPoint:
-                            unloadingCtrl.text,
-                        itemType:
-                            itemTypeCtrl.text,
-                        weight: weight,
-                        freightRate: rate,
-                        additions:
-                            additions,
-                        shortage:
-                            shortage,
-                        paid: paid,
-                        total: total,
-                        due: due,
-                        notes:
-                            notesCtrl.text,
-                      );
-
-                      await supabase
-                          .from('freights')
-                          .insert(
-                            newFreight
-                                .toMap(),
-                          );
+                          .update(updated.toMap())
+                          .eq('id', existing.id);
                     }
+
+                    // ==================================================
+                    // إضافة مقاولة جديدة
+                    // ==================================================
+
+                    else {
+                      final newFreight = FreightModel(
+                        id: const Uuid().v4(),
+                        date: dateCtrl.text,
+                        clientId: selectedClient!,
+                        supplierName: supplierCtrl.text.trim(),
+                        loadingPoint: loadingCtrl.text.trim(),
+                        unloadingPoint:
+                            unloadingCtrl.text.trim(),
+                        itemType: itemTypeCtrl.text.trim(),
+                        weight: weight,
+                        freightRate: rate,
+                        additions: additions,
+                        shortage: shortage,
+                        paid: paid,
+                        total: total,
+                        due: due,
+                        notes: notesCtrl.text.trim(),
+                      );
+
+                      await supabase
+                          .from('freights')
+                          .insert(newFreight.toMap());
+                    }
+
+                    // --------------------------------------------------
+                    // بعد الحفظ
+                    // --------------------------------------------------
 
                     if (!context.mounted) {
                       return;
@@ -788,32 +683,164 @@ class _FreightsScreenState extends State<FreightsScreen> {
                     Navigator.pop(ctx);
 
                     await _loadData();
+
+                    if (!mounted) {
+                      return;
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          isEdit
+                              ? 'تم تعديل المقاولة بنجاح'
+                              : 'تم تسجيل المقاولة بنجاح',
+                        ),
+                        backgroundColor:
+                            AppColors.receivableGreen,
+                      ),
+                    );
                   } catch (e) {
                     if (!context.mounted) {
                       return;
                     }
 
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(
+                    ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          'تعذر حفظ المقاولة:\n$e',
+                          isEdit
+                              ? 'تعذر تعديل المقاولة:\n$e'
+                              : 'تعذر حفظ المقاولة:\n$e',
                         ),
-                        backgroundColor:
-                            Colors.red,
+                        backgroundColor: Colors.red,
                       ),
                     );
                   }
                 },
-                child:
-                    const Text('حفظ المقاولة'),
+                child: Text(
+                  isEdit
+                      ? 'حفظ التعديل'
+                      : 'حفظ المقاولة',
+                ),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+
+  // ============================================================
+  // حذف مقاولة
+  // ============================================================
+
+  Future<void> _deleteFreight(
+    FreightModel freight,
+  ) async {
+    // ------------------------------------------------------------
+    // تأكيد الحذف أولاً
+    // ------------------------------------------------------------
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Row(
+            children: [
+              Icon(
+                Icons.warning_amber_rounded,
+                color: Colors.red,
+              ),
+              SizedBox(width: 8),
+              Text('تأكيد حذف المقاولة'),
+            ],
+          ),
+          content: Text(
+            'هل أنت متأكد من حذف مقاولة النقل الخاصة بالعميل:\n\n'
+            '${freight.clientName}\n\n'
+            'من ${freight.loadingPoint} إلى ${freight.unloadingPoint}\n\n'
+            'الإجمالي: ${AppFormatters.formatCurrency(freight.total)}',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('إلغاء'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('متابعة الحذف'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    // ------------------------------------------------------------
+    // حماية الحذف
+    //
+    // البصمة أولاً
+    // ثم كلمة المرور كبديل
+    // ------------------------------------------------------------
+
+    final isAuth =
+        await SettingsScreen.verifyPassword(context);
+
+    if (!isAuth) {
+      return;
+    }
+
+    if (!mounted) return;
+
+    // ------------------------------------------------------------
+    // تنفيذ الحذف
+    // ------------------------------------------------------------
+
+    try {
+      final supabase = Supabase.instance.client;
+
+      await supabase
+          .from('freights')
+          .delete()
+          .eq('id', freight.id);
+
+      if (!mounted) return;
+
+      await _loadData();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('تم حذف المقاولة بنجاح'),
+          backgroundColor: AppColors.receivableGreen,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'تعذر حذف المقاولة:\n$e',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   // ============================================================
@@ -880,8 +907,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
     );
 
     if (matches.isEmpty) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
             'لم يتم العثور على العميل',
@@ -894,8 +920,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) =>
-            FreightStatementScreen(
+        builder: (_) => FreightStatementScreen(
           initialPerson: matches.first,
         ),
       ),
@@ -913,8 +938,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
         return true;
       }
 
-      final q =
-          _searchQuery.toLowerCase();
+      final q = _searchQuery.toLowerCase();
 
       return f.clientName
               .toLowerCase()
@@ -951,19 +975,15 @@ class _FreightsScreenState extends State<FreightsScreen> {
                 vertical: 8,
               ),
               child: Container(
-                decoration:
-                    BoxDecoration(
+                decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius:
-                      BorderRadius.circular(
-                    10,
-                  ),
+                      BorderRadius.circular(10),
                 ),
                 child: TextField(
                   onChanged: (v) {
                     setState(
-                      () => _searchQuery =
-                          v,
+                      () => _searchQuery = v,
                     );
                   },
                   decoration:
@@ -972,11 +992,9 @@ class _FreightsScreenState extends State<FreightsScreen> {
                         'بحث بالعميل أو المورد أو التحميل / التعتيق...',
                     prefixIcon: Icon(
                       Icons.search,
-                      color:
-                          AppColors.primary,
+                      color: AppColors.primary,
                     ),
-                    border:
-                        InputBorder.none,
+                    border: InputBorder.none,
                     contentPadding:
                         EdgeInsets.symmetric(
                       vertical: 12,
@@ -987,6 +1005,13 @@ class _FreightsScreenState extends State<FreightsScreen> {
             ),
           ),
         ),
+
+        // ========================================================
+        // إضافة مقاولة
+        //
+        // الحماية موجودة داخل openFreightDialog
+        // عند الضغط على حفظ.
+        // ========================================================
 
         floatingActionButton:
             FloatingActionButton(
@@ -1044,15 +1069,13 @@ class _FreightsScreenState extends State<FreightsScreen> {
                                       .formatCurrency(
                                 _totalFreight,
                               ),
-                              icon: Icons
-                                  .local_shipping,
+                              icon:
+                                  Icons.local_shipping,
                               color:
-                                  AppColors
-                                      .primary,
+                                  AppColors.primary,
                             ),
                             _summaryCard(
-                              title:
-                                  'المسدد',
+                              title: 'المسدد',
                               value:
                                   AppFormatters
                                       .formatCurrency(
@@ -1070,8 +1093,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
                         Row(
                           children: [
                             _summaryCard(
-                              title:
-                                  'المستحق',
+                              title: 'المستحق',
                               value:
                                   AppFormatters
                                       .formatCurrency(
@@ -1080,18 +1102,15 @@ class _FreightsScreenState extends State<FreightsScreen> {
                               icon: Icons
                                   .account_balance_wallet,
                               color:
-                                  AppColors
-                                      .payableRed,
+                                  AppColors.payableRed,
                             ),
                             _summaryCard(
                               title:
                                   'إجمالي الوزن',
                               value:
                                   '${_totalWeight.toStringAsFixed(2)} طن',
-                              icon:
-                                  Icons.scale,
-                              color:
-                                  Colors.orange,
+                              icon: Icons.scale,
+                              color: Colors.orange,
                             ),
                           ],
                         ),
@@ -1115,14 +1134,10 @@ class _FreightsScreenState extends State<FreightsScreen> {
                               BoxDecoration(
                             color: AppColors
                                 .primary
-                                .withOpacity(
-                              0.07,
-                            ),
+                                .withOpacity(0.07),
                             borderRadius:
                                 BorderRadius
-                                    .circular(
-                              9,
-                            ),
+                                    .circular(9),
                           ),
                           child: Row(
                             mainAxisAlignment:
@@ -1171,9 +1186,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
                     ),
                   ),
 
-                  const Divider(
-                    height: 1,
-                  ),
+                  const Divider(height: 1),
 
                   // ==================================================
                   // قائمة النقلات
@@ -1188,8 +1201,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
                           )
                         : ListView.builder(
                             padding:
-                                const EdgeInsets
-                                    .all(8),
+                                const EdgeInsets.all(8),
                             itemCount:
                                 filtered.length,
                             itemBuilder:
@@ -1198,8 +1210,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
                                   filtered[i];
 
                               return Card(
-                                child:
-                                    ListTile(
+                                child: ListTile(
                                   leading:
                                       const CircleAvatar(
                                     child: Icon(
@@ -1208,8 +1219,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
                                     ),
                                   ),
 
-                                  title:
-                                      Text(
+                                  title: Text(
                                     f.clientName,
                                     style:
                                         const TextStyle(
@@ -1219,8 +1229,7 @@ class _FreightsScreenState extends State<FreightsScreen> {
                                     ),
                                   ),
 
-                                  subtitle:
-                                      Text(
+                                  subtitle: Text(
                                     '${f.loadingPoint} ➔ ${f.unloadingPoint}\n'
                                     'الوزن: ${f.weight} | '
                                     'النولون: ${f.freightRate}\n'
@@ -1229,42 +1238,165 @@ class _FreightsScreenState extends State<FreightsScreen> {
                                   ),
 
                                   trailing:
-                                      Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment
-                                            .center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment
-                                            .end,
+                                      Row(
+                                    mainAxisSize:
+                                        MainAxisSize.min,
                                     children: [
-                                      Text(
-                                        'المستحق: ${f.due}',
-                                        style:
-                                            const TextStyle(
-                                          color:
-                                              AppColors
-                                                  .payableRed,
-                                          fontWeight:
-                                              FontWeight
-                                                  .bold,
-                                        ),
+                                      // --------------------------------
+                                      // المستحق + التاريخ
+                                      // --------------------------------
+
+                                      Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment
+                                                .center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment
+                                                .end,
+                                        children: [
+                                          Text(
+                                            'المستحق: ${f.due}',
+                                            style:
+                                                const TextStyle(
+                                              color:
+                                                  AppColors
+                                                      .payableRed,
+                                              fontWeight:
+                                                  FontWeight
+                                                      .bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            f.date,
+                                            style:
+                                                const TextStyle(
+                                              fontSize:
+                                                  10,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      Text(
-                                        f.date,
-                                        style:
-                                            const TextStyle(
-                                          fontSize:
-                                              10,
-                                        ),
+
+                                      const SizedBox(
+                                        width: 8,
+                                      ),
+
+                                      // --------------------------------
+                                      // قائمة العمليات
+                                      // --------------------------------
+
+                                      PopupMenuButton<String>(
+                                        tooltip:
+                                            'العمليات',
+                                        onSelected:
+                                            (value) {
+                                          if (value ==
+                                              'edit') {
+                                            openFreightDialog(
+                                              existing:
+                                                  f,
+                                            );
+                                          } else if (value ==
+                                              'delete') {
+                                            _deleteFreight(
+                                              f,
+                                            );
+                                          } else if (value ==
+                                              'statement') {
+                                            _openClientStatement(
+                                              f,
+                                            );
+                                          }
+                                        },
+                                        itemBuilder:
+                                            (context) =>
+                                                const [
+                                          PopupMenuItem<
+                                              String>(
+                                            value:
+                                                'edit',
+                                            child:
+                                                Row(
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .edit,
+                                                  color:
+                                                      AppColors.primary,
+                                                ),
+                                                SizedBox(
+                                                  width:
+                                                      8,
+                                                ),
+                                                Text(
+                                                  'تعديل',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem<
+                                              String>(
+                                            value:
+                                                'statement',
+                                            child:
+                                                Row(
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .receipt_long,
+                                                  color:
+                                                      AppColors.primary,
+                                                ),
+                                                SizedBox(
+                                                  width:
+                                                      8,
+                                                ),
+                                                Text(
+                                                  'كشف حساب العميل',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          PopupMenuItem<
+                                              String>(
+                                            value:
+                                                'delete',
+                                            child:
+                                                Row(
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .delete_outline,
+                                                  color:
+                                                      Colors.red,
+                                                ),
+                                                SizedBox(
+                                                  width:
+                                                      8,
+                                                ),
+                                                Text(
+                                                  'حذف',
+                                                  style:
+                                                      TextStyle(
+                                                    color:
+                                                        Colors.red,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
 
+                                  // الضغط على النقلة = تعديل
                                   onTap: () =>
                                       openFreightDialog(
                                     existing: f,
                                   ),
 
+                                  // الضغط المطول = كشف العميل
                                   onLongPress: () =>
                                       _openClientStatement(
                                     f,
