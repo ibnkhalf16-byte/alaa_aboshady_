@@ -105,7 +105,7 @@ jobs:
           # ------------------------------------------
           # اسم التطبيق
           # ------------------------------------------
-          app_name = "حسابات السيد النماس"
+          app_name = "حسابات علاء ابو شادي"
 
           if re.search(r'android:label="[^"]*"', text):
               text = re.sub(
@@ -125,7 +125,7 @@ jobs:
 
           print("==========================================")
           print("AndroidManifest.xml configured successfully")
-          print("App Name: حسابات السيد النماس")
+          print("App Name: حسابات علاء ابو شادي")
           print("Internet Permission: ENABLED")
           print("==========================================")
           PY
