@@ -1,9 +1,8 @@
-import 'screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'core/theme/app_theme.dart';
-import 'screens/home_screen.dart';
+import 'screens/auth/login_screen.dart'; // تم الاستيراد هنا
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -11,7 +10,7 @@ void main() async {
   // تهيئة الاتصال بقاعدة بيانات Supabase بدلاً من SQLite
   await Supabase.initialize(
     url: 'https://fxfjuspajexuswenluuu.supabase.co',
-    anonKey: 'sb_publishable_WE6y9VaRNCKXy2ORYax4pw_zXD57MHF', // تم التصحيح من publishableKey إلى anonKey
+    anonKey: 'sb_publishable_WE6y9VaRNCKXy2ORYax4pw_zXD57MHF',
   );
 
   runApp(const ElsayedAccountsApp());
@@ -33,7 +32,7 @@ class ElsayedAccountsApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const LoginScreen(), 
+      home: const LoginScreen(), // تم تغيير الشاشة الرئيسية لتكون شاشة تسجيل الدخول
     );
   }
 }
