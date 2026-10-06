@@ -23,7 +23,7 @@ class ElsayedAccountsApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'حسابات علي خلف',
+      title: 'حسابات السيد النماس',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       locale: const Locale('ar'),
