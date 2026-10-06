@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import 'core/theme/app_theme.dart';
-import 'screens/auth/login_screen.dart'; // تم الاستيراد هنا
+import 'screens/auth/login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // تهيئة الاتصال بقاعدة بيانات Supabase بدلاً من SQLite
+  // تهيئة الاتصال بقاعدة بيانات Supabase
   await Supabase.initialize(
     url: 'https://fxfjuspajexuswenluuu.supabase.co',
-   publishableKey: 'sb_publishable_WE6y9VaRNCKXy2ORYax4pw_zXD57MHF',
+    publishableKey: 'sb_publishable_WE6y9VaRNCKXy2ORYax4pw_zXD57MHF',
   );
 
   runApp(const ElsayedAccountsApp());
 }
 
 class ElsayedAccountsApp extends StatelessWidget {
-  const ElsayedAccountsApp({super.key}) : super(key: key);
+  const ElsayedAccountsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,13 +27,15 @@ class ElsayedAccountsApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       locale: const Locale('ar'),
-      supportedLocales: const [Locale('ar')],
+      supportedLocales: const [
+        Locale('ar'),
+      ],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const LoginScreen(), // تم تغيير الشاشة الرئيسية لتكون شاشة تسجيل الدخول
+      home: const LoginScreen(),
     );
   }
 }
