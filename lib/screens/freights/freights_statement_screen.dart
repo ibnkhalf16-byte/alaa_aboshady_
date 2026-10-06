@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../core/database/database_helper.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/app_formatters.dart';
 import '../../models/person_model.dart';
-import '../../models/freight_model.dart'; // تأكد من إنشاء هذا النموذج كما شرحنا سابقاً
+import '../../models/freight_model.dart';
 
 class FreightStatementScreen extends StatefulWidget {
   final PersonModel person;
 
-  const FreightStatementScreen({Key? key, required this.person}) : super(key: key);
+  const FreightStatementScreen({super.key, required this.person});
 
   @override
   State<FreightStatementScreen> createState() => _FreightStatementScreenState();
@@ -29,32 +29,37 @@ class _FreightStatementScreenState extends State<FreightStatementScreen> {
   Future<void> _loadFreightStatement() async {
     setState(() => _isLoading = true);
     
-    final db = await DatabaseHelper.instance.database;
-    // جلب مقاولات النقل الخاصة بهذا العميل فقط
-    final maps = await db.query(
-      'freights',
-      where: 'client_id = ?',
-      whereArgs: [widget.person.id],
-      orderBy: 'date ASC',
-    );
+    try {
+      final supabase = Supabase.instance.client;
+      final maps = await supabase
+          .from('freights')
+          .select()
+          .eq('client_id', widget.person.id)
+          .order('date', ascending: true);
 
-    final freights = maps.map((m) => FreightModel.fromMap(m)).toList();
+      final freights = maps.map((m) => FreightModel.fromMap(m)).toList();
 
-    double totalDue = 0.0;
-    double totalPaid = 0.0;
+      double totalDue = 0.0;
+      double totalPaid = 0.0;
 
-    for (var f in freights) {
-      totalDue += f.due;
-      totalPaid += f.paid;
-    }
+      for (var f in freights) {
+        totalDue += f.due;
+        totalPaid += f.paid;
+      }
 
-    if (mounted) {
-      setState(() {
-        _freights = freights;
-        _totalDue = totalDue;
-        _totalPaid = totalPaid;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _freights = freights;
+          _totalDue = totalDue;
+          _totalPaid = totalPaid;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('خطأ: $e')));
+         setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -71,7 +76,6 @@ class _FreightStatementScreenState extends State<FreightStatementScreen> {
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  // ملخص الحساب
                   Container(
                     padding: const EdgeInsets.all(16),
                     color: AppColors.primary.withOpacity(0.05),
@@ -81,26 +85,19 @@ class _FreightStatementScreenState extends State<FreightStatementScreen> {
                         Column(
                           children: [
                             const Text('إجمالي المسدد', style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(
-                              AppFormatters.formatCurrency(_totalPaid),
-                              style: const TextStyle(color: AppColors.receivableGreen, fontWeight: FontWeight.bold),
-                            ),
+                            Text(AppFormatters.formatCurrency(_totalPaid), style: const TextStyle(color: AppColors.receivableGreen, fontWeight: FontWeight.bold)),
                           ],
                         ),
                         Column(
                           children: [
                             const Text('المستحق المتبقي', style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(
-                              AppFormatters.formatCurrency(_totalDue),
-                              style: const TextStyle(color: AppColors.payableRed, fontWeight: FontWeight.bold, fontSize: 18),
-                            ),
+                            Text(AppFormatters.formatCurrency(_totalDue), style: const TextStyle(color: AppColors.payableRed, fontWeight: FontWeight.bold, fontSize: 18)),
                           ],
                         ),
                       ],
                     ),
                   ),
                   const Divider(height: 1),
-                  // جدول تفاصيل مقاولات النقل
                   Expanded(
                     child: _freights.isEmpty
                         ? const Center(child: Text('لا توجد عمليات نقل مسجلة لهذا العميل'))
@@ -108,7 +105,7 @@ class _FreightStatementScreenState extends State<FreightStatementScreen> {
                             scrollDirection: Axis.horizontal,
                             child: SingleChildScrollView(
                               child: DataTable(
-                                headingRowColor: MaterialStateProperty.all(AppColors.primary.withOpacity(0.1)),
+                                headingRowColor: WidgetStateProperty.all(AppColors.primary.withOpacity(0.1)),
                                 columns: const [
                                   DataColumn(label: Text('التاريخ')),
                                   DataColumn(label: Text('التحميل')),
@@ -120,24 +117,4 @@ class _FreightStatementScreenState extends State<FreightStatementScreen> {
                                   DataColumn(label: Text('مستحق')),
                                 ],
                                 rows: _freights.map((f) {
-                                  return DataRow(cells: [
-                                    DataCell(Text(f.date)),
-                                    DataCell(Text(f.loadingPoint)),
-                                    DataCell(Text(f.unloadingPoint)),
-                                    DataCell(Text(f.weight.toStringAsFixed(2))),
-                                    DataCell(Text(f.freightRate.toStringAsFixed(2))),
-                                    DataCell(Text(f.total.toStringAsFixed(2))),
-                                    DataCell(Text(f.paid.toStringAsFixed(2), style: const TextStyle(color: AppColors.receivableGreen))),
-                                    DataCell(Text(f.due.toStringAsFixed(2), style: const TextStyle(color: AppColors.payableRed, fontWeight: FontWeight.bold))),
-                                  ]);
-                                }).toList(),
-                              ),
-                            ),
-                          ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-}
+                                  return DataRow(cells:
