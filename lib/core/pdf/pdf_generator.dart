@@ -4,7 +4,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 import '../../models/person_model.dart';
-
+import '../../models/freight_model.dart';
 class PdfGenerator {
   static Future<void> generateAndPrintStatement({
     required PersonModel person,
@@ -427,6 +427,345 @@ class PdfGenerator {
 
       name: 'كشف_حساب_${person.name}',
 
+      format: PdfPageFormat.a4.landscape,
+    );
+  }
+    static Future<void> generateAndPrintFreightStatement({
+    required PersonModel person,
+    required List<FreightModel> freights,
+  }) async {
+    final pdf = pw.Document();
+
+    final fontRegular = await PdfGoogleFonts.amiriRegular();
+    final fontBold = await PdfGoogleFonts.amiriBold();
+
+    double totalFreight = 0;
+    double totalPaid = 0;
+    double totalDue = 0;
+    double totalWeight = 0;
+
+    for (final freight in freights) {
+      totalFreight += freight.total;
+      totalPaid += freight.paid;
+      totalDue += freight.due;
+      totalWeight += freight.weight;
+    }
+
+    final currentDateStr =
+        DateTime.now().toString().substring(0, 16);
+
+    double runningBalance = 0;
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4.landscape,
+        textDirection: pw.TextDirection.rtl,
+        margin: const pw.EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 15,
+        ),
+        theme: pw.ThemeData.withFont(
+          base: fontRegular,
+          bold: fontBold,
+        ),
+
+        header: (pw.Context context) {
+          return pw.Column(
+            crossAxisAlignment:
+                pw.CrossAxisAlignment.stretch,
+            children: [
+              pw.Center(
+                child: pw.Text(
+                  'حسابات السيد النماس',
+                  textDirection: pw.TextDirection.rtl,
+                  style: pw.TextStyle(
+                    fontSize: 22,
+                    fontWeight: pw.FontWeight.bold,
+                    color: PdfColors.blueGrey900,
+                  ),
+                ),
+              ),
+
+              pw.SizedBox(height: 6),
+
+              pw.Row(
+                mainAxisAlignment:
+                    pw.MainAxisAlignment.start,
+                children: [
+                  pw.Text(
+                    'كشف حساب النقل: ${person.name}',
+                    textDirection: pw.TextDirection.rtl,
+                    style: pw.TextStyle(
+                      fontSize: 13,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+
+              pw.SizedBox(height: 8),
+            ],
+          );
+        },
+
+        footer: (pw.Context context) {
+          return pw.Column(
+            children: [
+              pw.SizedBox(height: 10),
+
+              pw.Row(
+                mainAxisAlignment:
+                    pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Text(
+                    'صفحة ${context.pageNumber}',
+                    style: const pw.TextStyle(
+                      fontSize: 9,
+                      color: PdfColors.grey700,
+                    ),
+                  ),
+
+                  pw.Text(
+                    'تاريخ الطباعة: $currentDateStr',
+                    style: const pw.TextStyle(
+                      fontSize: 9,
+                      color: PdfColors.grey700,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+
+        build: (pw.Context context) {
+          runningBalance = 0;
+
+          return [
+            pw.TableHelper.fromTextArray(
+              context: context,
+
+              border: pw.TableBorder.all(
+                color: PdfColors.grey400,
+                width: 0.5,
+              ),
+
+              headerStyle: pw.TextStyle(
+                fontSize: 9,
+                fontWeight: pw.FontWeight.bold,
+                color: PdfColors.white,
+              ),
+
+              headerDecoration:
+                  const pw.BoxDecoration(
+                color: PdfColor.fromInt(
+                  0xFF1E3A8A,
+                ),
+              ),
+
+              headerHeight: 28,
+              cellHeight: 24,
+
+              cellStyle: const pw.TextStyle(
+                fontSize: 8.5,
+              ),
+
+              cellAlignment: pw.Alignment.center,
+
+              columnWidths: const {
+                0: pw.FlexColumnWidth(1.5), // التاريخ
+                1: pw.FlexColumnWidth(2.0), // المورد
+                2: pw.FlexColumnWidth(1.8), // البضاعة
+                3: pw.FlexColumnWidth(2.2), // التحميل
+                4: pw.FlexColumnWidth(2.2), // التعتيق
+                5: pw.FlexColumnWidth(1.2), // طن
+                6: pw.FlexColumnWidth(1.6), // سعر الطن
+                7: pw.FlexColumnWidth(1.8), // الإجمالي
+                8: pw.FlexColumnWidth(1.8), // المسدد
+                9: pw.FlexColumnWidth(1.8), // المستحق
+                10: pw.FlexColumnWidth(1.9), // الرصيد
+              },
+
+              headers: <String>[
+                'التاريخ',
+                'المورد',
+                'البضاعة',
+                'جهة التحميل',
+                'جهة التعتيق',
+                'طن',
+                'سعر الطن',
+                'الإجمالي',
+                'المسدد',
+                'المستحق',
+                'الرصيد',
+              ],
+
+              data: freights.map((freight) {
+                runningBalance += freight.due;
+
+                return [
+                  freight.date,
+                  freight.supplierName.isEmpty
+                      ? ''
+                      : freight.supplierName,
+                  freight.itemType.isEmpty
+                      ? ''
+                      : freight.itemType,
+                  freight.loadingPoint.isEmpty
+                      ? ''
+                      : freight.loadingPoint,
+                  freight.unloadingPoint.isEmpty
+                      ? ''
+                      : freight.unloadingPoint,
+                  freight.weight > 0
+                      ? freight.weight.toStringAsFixed(2)
+                      : '',
+                  freight.freightRate > 0
+                      ? freight.freightRate.toStringAsFixed(2)
+                      : '',
+                  freight.total.toStringAsFixed(2),
+                  freight.paid.toStringAsFixed(2),
+                  freight.due.toStringAsFixed(2),
+                  runningBalance.toStringAsFixed(2),
+                ];
+              }).toList(),
+            ),
+
+            pw.SizedBox(height: 14),
+
+            // ----------------------------------------------------
+            // ملخص الحساب
+            // ----------------------------------------------------
+
+            pw.Row(
+              mainAxisAlignment:
+                  pw.MainAxisAlignment.spaceBetween,
+              children: [
+                pw.Container(
+                  padding:
+                      const pw.EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.grey500,
+                    ),
+                    borderRadius:
+                        const pw.BorderRadius.all(
+                      pw.Radius.circular(4),
+                    ),
+                  ),
+                  child: pw.Text(
+                    'إجمالي الوزن: '
+                    '${totalWeight.toStringAsFixed(2)} طن',
+                    textDirection:
+                        pw.TextDirection.rtl,
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight:
+                          pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                pw.Container(
+                  padding:
+                      const pw.EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.grey500,
+                    ),
+                    borderRadius:
+                        const pw.BorderRadius.all(
+                      pw.Radius.circular(4),
+                    ),
+                  ),
+                  child: pw.Text(
+                    'إجمالي النقل: '
+                    '${totalFreight.toStringAsFixed(2)} ج.م',
+                    textDirection:
+                        pw.TextDirection.rtl,
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight:
+                          pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                pw.Container(
+                  padding:
+                      const pw.EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 7,
+                  ),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.grey500,
+                    ),
+                    borderRadius:
+                        const pw.BorderRadius.all(
+                      pw.Radius.circular(4),
+                    ),
+                  ),
+                  child: pw.Text(
+                    'إجمالي المسدد: '
+                    '${totalPaid.toStringAsFixed(2)} ج.م',
+                    textDirection:
+                        pw.TextDirection.rtl,
+                    style: pw.TextStyle(
+                      fontSize: 10,
+                      fontWeight:
+                          pw.FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                pw.Container(
+                  padding:
+                      const pw.EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(
+                      color: PdfColors.green700,
+                      width: 1,
+                    ),
+                    borderRadius:
+                        const pw.BorderRadius.all(
+                      pw.Radius.circular(4),
+                    ),
+                    color: PdfColors.green50,
+                  ),
+                  child: pw.Text(
+                    'المستحق لنا: '
+                    '${totalDue.toStringAsFixed(2)} ج.م',
+                    textDirection:
+                        pw.TextDirection.rtl,
+                    style: pw.TextStyle(
+                      fontSize: 11,
+                      fontWeight:
+                          pw.FontWeight.bold,
+                      color: PdfColors.green800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ];
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async =>
+          pdf.save(),
+      name: 'كشف_حساب_النقل_${person.name}',
       format: PdfPageFormat.a4.landscape,
     );
   }
