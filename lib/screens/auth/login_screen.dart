@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final bool authenticated = await _localAuth.authenticate(
         localizedReason:
-            'يرجى استخدام البصمة لفتح برنامج حسابات السيد النماس',
+            'يرجى استخدام البصمة لفتح برنامج حسابات علاء ابو شادي',
         options: const AuthenticationOptions(
           biometricOnly: true,
           stickyAuth: true,
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
       final bool authenticated = await _localAuth.authenticate(
         localizedReason:
-            'يرجى استخدام البصمة لفتح برنامج حسابات السيد النماس',
+            'يرجى استخدام البصمة لفتح برنامج حسابات علاء ابو شادي',
         options: const AuthenticationOptions(
           biometricOnly: true,
           stickyAuth: true,
@@ -271,7 +271,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
 
                 const Text(
-                  'حسابات السيد النماس',
+                  'حسابات علاء ابو شادي',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
