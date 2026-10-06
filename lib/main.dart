@@ -10,14 +10,14 @@ void main() async {
   // تهيئة الاتصال بقاعدة بيانات Supabase بدلاً من SQLite
   await Supabase.initialize(
     url: 'https://fxfjuspajexuswenluuu.supabase.co',
-    anonKey: 'sb_publishable_WE6y9VaRNCKXy2ORYax4pw_zXD57MHF',
+   publishableKey: 'sb_publishable_WE6y9VaRNCKXy2ORYax4pw_zXD57MHF',
   );
 
   runApp(const ElsayedAccountsApp());
 }
 
 class ElsayedAccountsApp extends StatelessWidget {
-  const ElsayedAccountsApp({Key? key}) : super(key: key);
+  const ElsayedAccountsApp({super.key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
