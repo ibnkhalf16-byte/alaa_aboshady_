@@ -1,5 +1,7 @@
+```dart
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
 import '../../core/constants/app_colors.dart';
 import '../../core/utils/app_formatters.dart';
 import '../../models/person_model.dart';
@@ -8,10 +10,14 @@ import '../../models/freight_model.dart';
 class FreightStatementScreen extends StatefulWidget {
   final PersonModel person;
 
-  const FreightStatementScreen({super.key, required this.person});
+  const FreightStatementScreen({
+    super.key,
+    required this.person,
+  });
 
   @override
-  State<FreightStatementScreen> createState() => _FreightStatementScreenState();
+  State<FreightStatementScreen> createState() =>
+      _FreightStatementScreenState();
 }
 
 class _FreightStatementScreenState extends State<FreightStatementScreen> {
@@ -27,39 +33,48 @@ class _FreightStatementScreenState extends State<FreightStatementScreen> {
   }
 
   Future<void> _loadFreightStatement() async {
-    setState(() => _isLoading = true);
-    
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
+
     try {
       final supabase = Supabase.instance.client;
+
       final maps = await supabase
           .from('freights')
           .select()
           .eq('client_id', widget.person.id)
           .order('date', ascending: true);
 
-      final freights = maps.map((m) => FreightModel.fromMap(m)).toList();
+      final freights =
+          maps.map((m) => FreightModel.fromMap(m)).toList();
 
       double totalDue = 0.0;
       double totalPaid = 0.0;
 
-      for (var f in freights) {
+      for (final f in freights) {
         totalDue += f.due;
         totalPaid += f.paid;
       }
 
-      if (mounted) {
-        setState(() {
-          _freights = freights;
-          _totalDue = totalDue;
-          _totalPaid = totalPaid;
-          _isLoading = false;
-        });
-      }
+      if (!mounted) return;
+
+      setState(() {
+        _freights = freights;
+        _totalDue = totalDue;
+        _totalPaid = totalPaid;
+        _isLoading = false;
+      });
     } catch (e) {
-      if (mounted) {
-         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('خطأ: $e')));
-         setState(() => _isLoading = false);
-      }
+      if (!mounted) return;
+
+      setState(() => _isLoading = false);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('خطأ: $e'),
+        ),
+      );
     }
   }
 
@@ -69,29 +84,62 @@ class _FreightStatementScreenState extends State<FreightStatementScreen> {
       textDirection: TextDirection.rtl,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('كشف حساب نقل: ${widget.person.name}'),
+          title: Text(
+            'كشف حساب نقل: ${widget.person.name}',
+          ),
           centerTitle: true,
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
             : Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
                     color: AppColors.primary.withOpacity(0.05),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      mainAxisAlignment:
+                          MainAxisAlignment.spaceAround,
                       children: [
                         Column(
                           children: [
-                            const Text('إجمالي المسدد', style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(AppFormatters.formatCurrency(_totalPaid), style: const TextStyle(color: AppColors.receivableGreen, fontWeight: FontWeight.bold)),
+                            const Text(
+                              'إجمالي المسدد',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              AppFormatters.formatCurrency(
+                                _totalPaid,
+                              ),
+                              style: const TextStyle(
+                                color:
+                                    AppColors.receivableGreen,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ],
                         ),
                         Column(
                           children: [
-                            const Text('المستحق المتبقي', style: TextStyle(fontWeight: FontWeight.bold)),
-                            Text(AppFormatters.formatCurrency(_totalDue), style: const TextStyle(color: AppColors.payableRed, fontWeight: FontWeight.bold, fontSize: 18)),
+                            const Text(
+                              'المستحق المتبقي',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              AppFormatters.formatCurrency(
+                                _totalDue,
+                              ),
+                              style: const TextStyle(
+                                color: AppColors.payableRed,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
+                            ),
                           ],
                         ),
                       ],
@@ -100,21 +148,110 @@ class _FreightStatementScreenState extends State<FreightStatementScreen> {
                   const Divider(height: 1),
                   Expanded(
                     child: _freights.isEmpty
-                        ? const Center(child: Text('لا توجد عمليات نقل مسجلة لهذا العميل'))
+                        ? const Center(
+                            child: Text(
+                              'لا توجد عمليات نقل مسجلة لهذا العميل',
+                            ),
+                          )
                         : SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
+                            scrollDirection:
+                                Axis.horizontal,
                             child: SingleChildScrollView(
                               child: DataTable(
-                                headingRowColor: WidgetStateProperty.all(AppColors.primary.withOpacity(0.1)),
+                                headingRowColor:
+                                    WidgetStateProperty.all(
+                                  AppColors.primary
+                                      .withOpacity(0.1),
+                                ),
                                 columns: const [
-                                  DataColumn(label: Text('التاريخ')),
-                                  DataColumn(label: Text('التحميل')),
-                                  DataColumn(label: Text('التعتيق')),
-                                  DataColumn(label: Text('الوزن (طن)')),
-                                  DataColumn(label: Text('النولون')),
-                                  DataColumn(label: Text('الإجمالي')),
-                                  DataColumn(label: Text('مسدد')),
-                                  DataColumn(label: Text('مستحق')),
+                                  DataColumn(
+                                    label: Text('التاريخ'),
+                                  ),
+                                  DataColumn(
+                                    label: Text('التحميل'),
+                                  ),
+                                  DataColumn(
+                                    label: Text('التعتيق'),
+                                  ),
+                                  DataColumn(
+                                    label: Text('الوزن (طن)'),
+                                  ),
+                                  DataColumn(
+                                    label: Text('النولون'),
+                                  ),
+                                  DataColumn(
+                                    label: Text('الإجمالي'),
+                                  ),
+                                  DataColumn(
+                                    label: Text('مسدد'),
+                                  ),
+                                  DataColumn(
+                                    label: Text('مستحق'),
+                                  ),
                                 ],
                                 rows: _freights.map((f) {
-                                  return DataRow(cells:
+                                  return DataRow(
+                                    cells: [
+                                      DataCell(
+                                        Text(f.date),
+                                      ),
+                                      DataCell(
+                                        Text(f.loadingPoint),
+                                      ),
+                                      DataCell(
+                                        Text(f.unloadingPoint),
+                                      ),
+                                      DataCell(
+                                        Text(
+                                          f.weight
+                                              .toStringAsFixed(2),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        Text(
+                                          f.freightRate
+                                              .toStringAsFixed(2),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        Text(
+                                          f.total
+                                              .toStringAsFixed(2),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        Text(
+                                          f.paid
+                                              .toStringAsFixed(2),
+                                          style: const TextStyle(
+                                            color: AppColors
+                                                .receivableGreen,
+                                          ),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        Text(
+                                          f.due
+                                              .toStringAsFixed(2),
+                                          style: const TextStyle(
+                                            color: AppColors
+                                                .payableRed,
+                                            fontWeight:
+                                                FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                          ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+```
