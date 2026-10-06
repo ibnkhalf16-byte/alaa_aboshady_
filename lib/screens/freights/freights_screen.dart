@@ -8,7 +8,7 @@ import '../../core/utils/app_formatters.dart';
 import '../../models/person_model.dart';
 import '../../models/freight_model.dart';
 import '../settings/settings_screen.dart';
-import 'freight_statement_screen.dart';
+import 'freights_statement_screen.dart';
 
 class FreightsScreen extends StatefulWidget {
   const FreightsScreen({Key? key}) : super(key: key);
